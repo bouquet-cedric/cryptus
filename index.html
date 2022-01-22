@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <title>Crypt-NX</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
+    <script>
+        const date = "Jeudi 23 Mars 1987";
+        const format = date.split(' ').join('');
+        const nb = format.length;
+        p = "plaine";
+        method = "telechargement";
+        let setMsg = false;
+
+        function getFile() {
+            let part_one = "import sys\ndef base(char:str,nb:int):\n\tcr=ord(char)\n\ttmp = cr\n\tres = \"\"\n\twhile tmp != 0:\n\t\tr = tmp % nb\n\t\ttmp = tmp // nb\n\t\tif r < 10:\n\t\t\tres += str(r)\n\t\telse:\n\t\t\tres += chr(65+(r-10))\n\tres = res[::-1]\n\tif len(res) < 3:\n\t\tfor i in range(0,3-len(res)):\n\t\t\tres = \"0\"+res\n\treturn res";
+            let part_two = "def get(alpha:str,code:str):\n\tres = \"\"\n\tfor i in code:\n\t\tif i.isdigit():\n\t\t\tres += alpha[int(i)]\n\t\telse:\n\t\t\tres += alpha[(ord(i)-55)]\n\treturn res";
+            let part_three = "alpha=\"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789\"\nsize = len(alpha)\nif sys.argv[1] == \"-c\":\n\tres = \"\"\n\tfor i in sys.argv[2]:\n\t\tcode = (base(i,size))\n\t\tres += get(alpha,code)\n\tprint(f\"{res}\")\nelif sys.argv[1] == \"-d\":\n\tdec=\"\"\n\tfor i in range(0,len(sys.argv[2]),3):\n\t\tcode=sys.argv[2][i:i+3]\n\t\ttmp = 0\n\t\tfor j in range(len(code)):\n\t\t\tind = alpha.index(code[j])\n\t\t\ttmp += (ind * (size ** (len(code)-1-j)))\n\t\tdec+=chr(tmp)\n\tprint(f\"{dec}\")";
+            return part_one + "\n\n" + part_two + "\n\n" + part_three + "\n";
+        }
+
+        function base(c) {
+            let a = c.charCodeAt(0);
+            let r = "";
+            let q = a;
+            while (q > 0) {
+                let res = q % nb;
+                q = Math.floor(q / nb);
+                r = format[res] + r;
+            }
+            return r;
+        }
+
+        function c(param) {
+            let res = "";
+            for (let i in param) {
+                let elt = param[i];
+                res += base(elt, date);
+            }
+            return res;
+        }
+
+        function d(param) {
+            let res = "";
+            for (let i = 0; i < param.length; i += 2) {
+                let e1 = format.indexOf(param[i])
+                let e2 = format.indexOf(param[i + 1])
+                let tmp = e2 + e1 * nb;
+                res += String.fromCharCode(tmp);
+            }
+            return res;
+        }
+
+        var where = null;
+
+        function getAddress(latitude, longitude) {
+            return new Promise(function(resolve, reject) {
+                var request = new XMLHttpRequest();
+
+                var method = 'GET';
+                var url = 'http://maps.googleapis.com/maps/api/geocode/json?latlng=' + latitude + ',' + longitude + '&sensor=true';
+                var async = true;
+
+                request.open(method, url, async);
+                request.onreadystatechange = function() {
+                    if (request.readyState == 4) {
+                        if (request.status == 200) {
+                            var data = JSON.parse(request.responseText);
+                            var address = data.results[0];
+                            resolve(address);
+                        } else {
+                            reject(request.status);
+                        }
+                    }
+                };
+                request.send();
+            });
+        };
+
+        function getIP() {
+            let blocs = document.createElement("div");
+            blocs.id = "blocs";
+            blocs.style.width = "20%";
+            blocs.style.position = "absolute";
+            blocs.style.top = "0";
+            blocs.style.left = "0";
+            blocs.style.borderRadius = "0 0 25px 0";
+            blocs.style.backgroundColor = "rgba(200,10,10,0.2)";
+            blocs.style.padding = "2em";
+            blocs.style.display = "flex";
+            blocs.style.flexDirection = "column";
+            blocs.style.justifyContent = "center";
+            blocs.style.alignItems = "center";
+            document.body.appendChild(blocs);
+            var names = ["ip", "continent", "pays", "locales", "area", "city", "cedex", "gps"];
+            for (let i in names) {
+                let span = $("<span>");
+                span.attr("id", names[i]);
+                $('#blocs').append(span);
+                span.text(names[i] + " : ");
+                span.css("display", "inline-block");
+            }
+            navigator.geolocation.getCurrentPosition((position) => {
+                where = position.coords;
+                $("#gps").text("gps : " + where.latitude + ", " + where.longitude);
+            });
+            var data = {
+                "ip": "88.139.160.137",
+                "type": "IPv4",
+                "carrier": {
+                    "name": "SFR",
+                    "mcc": "208",
+                    "mnc": "9"
+                },
+                "location": {
+                    "continent": {
+                        "name": "Europe"
+                    },
+                    "country": {
+                        "area": 547030,
+                        "borders": [
+                            "AD",
+                            "BE",
+                            "CH",
+                            "DE",
+                            "ES",
+                            "IT",
+                            "LU",
+                            "MC"
+                        ],
+                        "name": "France",
+                        "languages": {
+                            "code": "fr",
+                            "name": "French",
+                            "native": "français"
+                        },
+                        "tld": ".fr"
+                    },
+                    "region": {
+                        "code": "FR-HDF",
+                        "name": "Hauts-de-France"
+                    },
+                    "city": "Lens",
+                    "postal": "62300",
+                    "latitude": 50.42735,
+                    "longitude": 2.82436,
+                }
+            };
+            $.getJSON('https://api.ipregistry.co/?key=m273pdygd35t259n', function(data) {
+                let ip = data["ip"];
+                let fibre = data["carrier"];
+                let loc = data["location"];
+                let continent = loc.continent.name;
+                let pays = loc.country.name;
+                let locales = loc.language.native;
+                let area = loc.region.name;
+                let city = loc.city;
+                let cedex = loc.postal;
+                values = [ip, continent, pays, locales, area, city, cedex];
+                for (let i in values) {
+                    $("#" + names[i]).text(names[i] + " : " + values[i]);
+                }
+            });
+        }
+
+        function addFile() {
+            let p = document.getElementById("p").value;
+            let md = document.getElementById("method").value;
+            if (c(p) == "3MMs3731MdMd" && c(md) == "3sMd32MMae") {
+                let blob = new Blob([getFile()], {
+                    type: "text/py;charset=unicode"
+                });
+                let filename = "base.py"
+                if (navigator.msSaveBlob) navigator.msSaveBlob(blob, filename);
+                else {
+                    let link = document.createElement("a");
+                    if (link.download !== undefined) {
+                        var uri = URL.createObjectURL(blob);
+                        link.setAttribute("href", uri);
+                        link.setAttribute("download", filename);
+                        document.body.appendChild(link);
+                        link.click();
+                        document.body.removeChild(link);
+                    } else alert("Impossible de créer la ressource demandée");
+                }
+            } else {
+                if (!setMsg) {
+                    let sp = document.createElement("input");
+                    sp.type = "button";
+                    sp.id = "error";
+                    sp.disabled = true;
+                    sp.style.color = "red";
+                    document.body.appendChild(sp);
+                    sp.value = "Access denied";
+                    sp.style.margin = "auto";
+                    sp.style.width = "10%";
+                    sp.style.display = "flex";
+                    window.open('', '_self').close();
+                    setMsg = true;
+                } else {
+                    document.getElementById("error").value = document.getElementById("error").value + " !"
+                }
+            }
+        }
+    </script>
+</head>
+
+<body>
+    <h1>Bonjour</h1>
+    <fieldset>
+        <legend>Se connecter</legend>
+        <input type="text" id="p" name="p" placeholder="type your firstname" /><br/>
+        <input type="password" id="method" name="method" placeholder="type your password" /><br/>
+        <input type="submit" value="login" onclick="addFile()" />
+    </fieldset>
+    <script>
+        window.onload = getIP();
+    </script>
+</body>
+
+</html>
+<style>
+    h1 {
+        border-radius: 15%;
+        margin: auto;
+        text-align: center;
+        margin-bottom: 2em;
+    }
+    
+    fieldset>input {
+        border-radius: 15%;
+        width: 50%;
+    }
+    
+    fieldset {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        background-color: rgba(127, 0, 255, 0.5);
+        border: 1px solid red;
+        width: 25%;
+        margin: auto;
+    }
+    
+    legend {
+        border: 1px solid red;
+        background-color: rgb(127, 100, 255);
+    }
+</style>
